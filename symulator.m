@@ -22,7 +22,7 @@ function [t, Tb, Tw] = symulator(h, A, mb, mw, cb, cw, T0, interval, dt, metoda)
         metoda = "euler_improved";
     end
     
-    F = @(T) rownania_stanu(T, h, A, mb, mw, cb, cw);
+    F = @(t, T) rownania_stanu(T, h, A, mb, mw, cb, cw);
 
     switch lower(metoda)
         case 'euler'
@@ -30,7 +30,7 @@ function [t, Tb, Tw] = symulator(h, A, mb, mw, cb, cw, T0, interval, dt, metoda)
                 interval(end), T0, dt);
         case 'euler_improved'
             [t, Y] = metoda_ulepszona_eulera(F, interval(1), ...
-                interval(end), T0, dt)
+                interval(end), T0, dt);
         otherwise
             error("Nieznana metoda - wybierz 'euler' lub" + ...
                 "'euler_improved'")
@@ -44,10 +44,10 @@ function dT = rownania_stanu(T, h, A, mb, mw, cb, cw)
      Tb = T(1);
      Tw = T(2);
 
-     dTb_dt = - (h*A/mb*cb) * (Tb-Tw);
-     dTw_dw = h*A/mw*cw * (Tb-Tw);
+     dTb_dt = -(h * A / (mb * cb)) * (Tb - Tw);
+     dTw_dt =  (h * A / (mw * cw)) * (Tb - Tw);
 
-     dT = [dTb_dt, dTw_dw];
+     dT = [dTb_dt; dTw_dt];
 end
 
 function [t, y] = metoda_ulepszona_eulera(f, t0, tn, y0, h)
