@@ -52,7 +52,7 @@ function czesc_1
     czasy_odczytu = [2, 3, 4, 5];
     dt_sim = 0.001;
 
-    fprintf('\n--- WYNIKI SYMULACJI DLA WARIANTÓW Z TABELI 1 ---\n');
+    fprintf('\n--- WYNIKI SYMULACJI DLA WARIANTÓW Z EKSPERYMENTU ---\n');
     for i = 1:size(przypadki, 1)
         Tb0_i = przypadki(i, 1);
         Tw0_i = przypadki(i, 2);
@@ -70,7 +70,6 @@ function czesc_1
                 t_odcz, Tbi(idx), Twi(idx));
         end
     end
-
 
 
     figure(2);
@@ -107,4 +106,52 @@ function czesc_1
     title('Temperatura oleju T_w(t)');
     legend('Location', 'southeast', 'FontSize', 10);
     hold off;
+
+
+    figure('Name', 'Czesc 1 - Wplyw kroku dt', 'Position', [150, 150, 950, 420]);
+    kroki_test = [0.2, 0.1, 0.05, 0.001];
+
+    subplot(1, 2, 1);
+    hold on; box on; grid on;
+    for dt_test = kroki_test
+        [t_dt, Tb_dt, ~] = symulator(h, A, mb, mw, cb, cw, T0, [0, 2.5], dt_test, 'euler');
+        plot(t_dt, Tb_dt, 'LineWidth', 1.2, 'DisplayName', sprintf('dt = %.3f s', dt_test));
+    end
+    plot(t_45, T_45(:, 1), 'k--', 'LineWidth', 1.5, 'DisplayName', 'ode45');
+    xlim([0, 2.5]); ylim([0, 1200]);
+    xlabel('t [s]'); ylabel('T_b [^\circC]');
+    title('Metoda prosta Eulera O(\Deltat)');
+    legend('Location', 'northeast', 'FontSize', 9);
+    hold off;
+
+    subplot(1, 2, 2);
+    hold on; box on; grid on;
+    for dt_test = kroki_test
+        [t_dt, Tb_dt, ~] = symulator(h, A, mb, mw, cb, cw, T0, [0, 2.5], dt_test, 'euler_improved');
+        plot(t_dt, Tb_dt, 'LineWidth', 1.2, 'DisplayName', sprintf('dt = %.3f s', dt_test));
+    end
+    plot(t_45, T_45(:, 1), 'k--', 'LineWidth', 1.5, 'DisplayName', 'ode45');
+    xlim([0, 2.5]); ylim([0, 1200]);
+    xlabel('t [s]'); ylabel('T_b [^\circC]');
+    title('Metoda ulepszona Eulera O(\Deltat^2)');
+    legend('Location', 'northeast', 'FontSize', 9);
+    hold off;
+
+
+    fprintf('\n--- ANALIZA DOKŁADNOŚCI METOD W ZALEŻNOŚCI OD KROKU dt ---\n');
+    kroki_err = [0.1, 0.05, 0.02, 0.01, 0.001];
+    for dt_e = kroki_err
+        [te, Tb_e, ~]  = symulator(h, A, mb, mw, cb, cw, T0, interval, dt_e, ...
+            'euler');
+        [tu, Tb_u, ~]  = symulator(h, A, mb, mw, cb, cw, T0, interval, dt_e, ...
+            'euler_improved');
+
+        Tb_ref = interp1(t_45, T_45(:, 1), te, 'spline');
+
+        err_e = max(abs(Tb_e - Tb_ref));
+        err_u = max(abs(Tb_u - Tb_ref));
+        fprintf(['dt = %.3f s -> Max błąd Euler prosty = %7.4f st.C | ' ...
+            'Euler ulepszony = %7.4f st.C\n'], ...
+            dt_e, err_e, err_u);
+    end
 end
