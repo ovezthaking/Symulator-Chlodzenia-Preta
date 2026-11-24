@@ -43,6 +43,12 @@ end
 function dT = rownania_stanu(T, h, A, mb, mw, cb, cw)
      Tb = T(1);
      Tw = T(2);
+        
+     if isnumeric(h)
+         h = h;
+     else
+         h = h(Tb - Tw);
+     end
 
      dTb_dt = -(h * A / (mb * cb)) * (Tb - Tw);
      dTw_dt =  (h * A / (mw * cw)) * (Tb - Tw);
