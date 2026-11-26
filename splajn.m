@@ -1,4 +1,4 @@
-function Sx = spline(x, y, x_target)
+function Sx = splajn(x, y, x_target)
     [C, a, b, h] = wyznacz_wspolczynniki_splajnu(x, y);
 
     Sx = zeros(size(x_target));
