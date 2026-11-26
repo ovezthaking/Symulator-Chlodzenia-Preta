@@ -1,12 +1,18 @@
 function a = approx(x, y, m, x_target)
+    % Skalowanie aby zapobiec ostrzeżeniom o niedokładności
+    mu = mean(x);
+    sigma = std(x);
+    x = (x-mu) / sigma;
+
     M = zeros(length(x), m+1);
     for i=0:m
         M(:,i+1) = x .^i;
     end
     
     y = y(:);
-    a=(M' * M) \ (M' * y);
+    a=M \ y;
     if nargin > 3
+        x_target = (x_target - mu) / sigma;
         a = oblicz_wielomian(a, x_target);
     end
 end
